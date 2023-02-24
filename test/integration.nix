@@ -26,7 +26,12 @@ pkgs.nixosTest {
       file = ../example/passwordfile-user1.age;
     };
 
-    age.identityPaths = options.age.identityPaths.default ++ ["/etc/ssh/this_key_wont_exist"];
+    age.identityPaths =
+      options.age.identityPaths.default
+      ++ [
+        ../example_keys/nonsecret_key_in_store
+        "/etc/ssh/this_key_wont_exist"
+      ];
 
     environment.systemPackages = [
       (pkgs.callPackage ../pkgs/agenix.nix {})
@@ -67,6 +72,9 @@ pkgs.nixosTest {
     assert "${user}" in system1.succeed("cat /tmp/1")
 
     userDo = lambda input : f"sudo -u user1 -- bash -c 'set -eou pipefail; cd /tmp/secrets; {input}'"
+
+    nonsecret = system1.succeed("agenix --decrypt test_issue_165.age")
+    assert nonsecret == "not terribly secret stuff here"
 
     before_hash = system1.succeed(userDo('sha256sum passwordfile-user1.age')).split()
     print(system1.succeed(userDo('agenix -r -i /home/user1/.ssh/id_ed25519')))
