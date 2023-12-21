@@ -20,7 +20,7 @@
     home-manager,
   }: let
     agenix = system: nixpkgs.legacyPackages.${system}.callPackage ./pkgs/agenix.nix {};
-    doc = system: nixpkgs.legacyPackages.${system}.callPackage ./pkgs/doc.nix {};
+    doc = system: nixpkgs.legacyPackages.${system}.callPackage ./pkgs/doc.nix {inherit self;};
   in {
     nixosModules.age = import ./modules/age.nix;
     nixosModules.default = self.nixosModules.age;
